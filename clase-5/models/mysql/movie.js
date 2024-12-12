@@ -24,17 +24,28 @@ export class MovieModel {
         [lowerCaseGenre]
       )
 
-      // no genre found
-      if (genres.length === 0) return []
+      // Obtener el ID del género
+      const [{ id: genreId }] = genres;
 
-      // get the id from the first genre result
-      const [{ id }] = genres
+      // Obtener las películas relacionadas con el género
+      const [movies] = await connection.query(
+        `
+        SELECT BIN_TO_UUID(movie.id) AS id, 
+              movie.title, 
+              movie.year, 
+              movie.director, 
+              movie.duration, 
+              movie.poster, 
+              movie.rate
+        FROM movie
+        JOIN movies_genres ON movie.id = movies_genres.movie_id
+        WHERE movies_genres.genre_id = ?;
+        `,
+        [genreId]
+      );
 
-      // get all movies ids from database table
-      // la query a movie_genres
-      // join
-      // y devolver resultados..
-      return []
+      // Devolver las películas encontradas
+      return movies;
     }
 
     const [movies] = await connection.query(
